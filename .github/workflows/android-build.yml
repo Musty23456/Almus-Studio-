@@ -22,13 +22,14 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install NDK and CMake
+      # GitHub-hosted ubuntu-latest runners already ship with an Android SDK
+      # (ANDROID_HOME is preset) — the third-party android-actions/setup-android
+      # step was dropped here because it has been unreliable; we only need to
+      # accept licenses and install the NDK/CMake versions this project pins.
+      - name: Accept SDK licenses and install NDK/CMake
         run: |
-          yes | sdkmanager --licenses > /dev/null || true
-          sdkmanager --install "ndk;26.1.10909125" "cmake;3.22.1"
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;26.1.10909125" "cmake;3.22.1" "platforms;android-34"
 
       # Provisions a matching Gradle version and caches it + the module cache
       # between runs, without depending on a committed gradle-wrapper.jar.
